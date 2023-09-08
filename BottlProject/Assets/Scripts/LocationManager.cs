@@ -17,74 +17,76 @@ public class LocationManager : MonoBehaviour
         StartCoroutine(StartLocationTracking());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     IEnumerator StartLocationTracking()
     {
-        //print(LocationService.status);
-
-        if (!Permission.HasUserAuthorizedPermission(Permission.FineLocation))
+        #if UNITY_EDITOR
+        //Wait until Unity connects to the Unity Remote
+        while (!UnityEditor.EditorApplication.isRemoteConnected)
         {
-            Permission.RequestUserPermission(Permission.FineLocation);
-            Permission.RequestUserPermission(Permission.CoarseLocation);
-            print("no");
+            yield return null;
         }
-        else
+        #endif
+
+        // Check if the user has location service enabled.
+        if (!Input.location.isEnabledByUser)
         {
-            Debug.Log ("Latitude : " + Input.location.lastData.latitude);
-            Debug.Log ("Longitude : " + Input.location.lastData.longitude);
-            
+            print("location tracking not enabled");
+            yield break;
+        }
+
+        // Starts the location service.
+        Input.location.Start();
+        Input.location.Stop();
+        yield return new WaitForSeconds(3f);
+        Input.location.Start();
+
+        TryAgain();
+
+        // Stops the location service if there is no need to query location updates continuously.
+        Input.location.Stop();
+    }
+
+    void TryAgain()
+    {
+        // If the connection failed this cancels location service use.
+        if (Input.location.status == LocationServiceStatus.Failed)
+        {
+            print("Unable to determine device location");
+            //yield break;
+        }
+        if (Input.location.status == LocationServiceStatus.Running)
+        {
+            print("yuh");
+            // if the connection succeeded, display loc
             textDisplay.text = "Latitude : " + Input.location.lastData.latitude +
                 "\n" + "Longitude : " + Input.location.lastData.longitude;
         }
-        
-        //print(LocationService.status);
-        
-        Input.location.Start();
-        
-        // Waits until the location service initializes
-        int maxWait = 20;
-        while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
+        if (Input.location.status == LocationServiceStatus.Initializing)
         {
-            yield return new WaitForSeconds(1);
-            maxWait--;
+            print("initing");
         }
-
-        // If the service didn't initialize in 20 seconds this cancels location service use.
-        if (maxWait < 1)
+        if (Input.location.status == LocationServiceStatus.Stopped)
         {
-            print("Timed out");
-            yield break;
+            print("why stop");
         }
-
-        ////
-
-        // check if user allowed location tracking
-        if (Input.location.isEnabledByUser)
-        {
-            Input.location.Start();
-        }
-
-        // check if status is initializing?
-        while (Input.location.status == LocationServiceStatus.Initializing)
-        {
-            yield return new WaitForSeconds(1);
-        }
-
-        // if location check fails
-        if (Input.location.status == LocationServiceStatus.Failed)
-        {
-            Debug.Log("Unable to determine device location");
-            yield break;
-        }
-        
-        Debug.Log ("Latitude : " + Input.location.lastData.latitude);
-        Debug.Log ("Longitude : " + Input.location.lastData.longitude);
-        Debug.Log("Altitude : " + Input.location.lastData.altitude);
-
     }
 }
+
+// excess
+/*
+    // Waits until the location service initializes
+    int maxWait = 20;
+    while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
+    {
+        yield return new WaitForSeconds(1);
+        maxWait--;
+        print("tick");
+    }
+
+    // If the service didn't initialize in 20 seconds this cancels location service use.
+    if (maxWait < 1)
+    {
+        print("Timed out");
+        yield break;
+    }
+*/
