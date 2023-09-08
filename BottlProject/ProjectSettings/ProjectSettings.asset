@@ -431,7 +431,7 @@ PlayerSettings:
   logObjCUncaughtExceptions: 1
   enableCrashReportAPI: 0
   cameraUsageDescription: 
-  locationUsageDescription: 
+  locationUsageDescription: 'Used to place your anonymous messages at your location. '
   microphoneUsageDescription: 
   bluetoothUsageDescription: 
   switchNMETAOverride: 
