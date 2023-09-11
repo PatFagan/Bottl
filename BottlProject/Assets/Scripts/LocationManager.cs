@@ -10,6 +10,7 @@ using TMPro;
 public class LocationManager : MonoBehaviour
 {
     public TMP_Text textDisplay;
+    public GameObject map;
 
     // Start is called before the first frame update
     void Start()
@@ -60,6 +61,7 @@ public class LocationManager : MonoBehaviour
             // if the connection succeeded, display loc
             textDisplay.text = "Latitude : " + Input.location.lastData.latitude +
                 "\n" + "Longitude : " + Input.location.lastData.longitude;
+            DisplayMap();
         }
         if (Input.location.status == LocationServiceStatus.Initializing)
         {
@@ -69,6 +71,18 @@ public class LocationManager : MonoBehaviour
         {
             print("why stop");
         }
+    }
+
+    void DisplayMap()
+    {
+        map.SetActive(true);
+
+        float _long = -47.62962705129123f;
+        float _lat = -136.7416840191186f;
+        float radius = 10;
+        
+        Vector3 point = new Vector3(radius, 0, 0);
+        point = Quaternion.Euler(0, _lat, _long) * point;
     }
 }
 
